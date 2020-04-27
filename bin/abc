@@ -1,0 +1,342 @@
+import java.awt.EventQueue;
+
+import javax.swing.JDialog;
+import javax.swing.JFileChooser;
+import javax.swing.JFrame;
+
+import com.didisoft.pgp.PGPException;
+import com.didisoft.pgp.PGPLib;
+import javax.swing.JButton;
+import javax.swing.JTextField;
+import javax.swing.JLabel;
+import javax.swing.SwingConstants;
+import java.awt.event.ActionListener;
+import java.io.File;
+import java.io.IOException;
+import java.awt.event.ActionEvent;
+
+public class EncryptDialog extends JDialog {
+	private JTextField SourceTextField;
+	private JTextField TargetTextField;
+	private JTextField UidTextField;
+
+	/**
+	 * Launch the application.
+	 */
+	public static void main(String[] args) {
+		EventQueue.invokeLater(new Runnable() {
+			public void run() {
+				try {
+					EncryptDialog dialog = new EncryptDialog();
+					dialog.setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
+					dialog.setVisible(true);
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+			}
+		});
+	}
+
+	/**
+	 * Create the dialog.
+	 */
+	public EncryptDialog() {
+		setTitle("File Encryption");
+		setBounds(100, 100, 450, 300);
+		getContentPane().setLayout(null);
+		
+		
+		
+		SourceTextField = new JTextField();
+		SourceTextField.setBounds(181, 30, 243, 22);
+		getContentPane().add(SourceTextField);
+		SourceTextField.setColumns(10);
+		
+		TargetTextField = new JTextField();
+		TargetTextField.setBounds(181, 85, 243, 23);
+		getContentPane().add(TargetTextField);
+		TargetTextField.setColumns(10);
+		
+		JLabel UseridLabel = new JLabel("Recipient Userid");
+		UseridLabel.setHorizontalAlignment(SwingConstants.CENTER);
+		UseridLabel.setBounds(22, 143, 119, 20);
+		getContentPane().add(UseridLabel);
+		
+		UidTextField = new JTextField();
+		UidTextField.setBounds(181, 143, 243, 20);
+		getContentPane().add(UidTextField);
+		UidTextField.setColumns(10);
+		
+		final JLabel EncryptMsgLabel = new JLabel("");
+		EncryptMsgLabel.setHorizontalAlignment(SwingConstants.CENTER);
+		EncryptMsgLabel.setBounds(130, 187, 214, 22);
+		getContentPane().add(EncryptMsgLabel);
+		
+		
+		JButton SourceButton = new JButton("Source");
+		SourceButton.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				JFileChooser jFileChooser = new JFileChooser();
+		        jFileChooser.setCurrentDirectory(new File("C:"));
+		         
+		        int result = jFileChooser.showOpenDialog(new JFrame());
+		     
+		     
+		        if (result == JFileChooser.APPROVE_OPTION) {
+		            File selectedFile = jFileChooser.getSelectedFile();
+		            SourceTextField.setText(selectedFile.getAbsolutePath());
+		        }
+			}
+		});
+		SourceButton.setBounds(36, 29, 89, 23);
+		getContentPane().add(SourceButton);
+		
+		JButton TargetButton = new JButton("Target");
+		TargetButton.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				
+				JFileChooser jFileChooser = new JFileChooser();
+				jFileChooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
+		        jFileChooser.setCurrentDirectory(new File("C:"));
+		         
+		        int result = jFileChooser.showOpenDialog(new JFrame());
+		     
+		     
+		        if (result == JFileChooser.APPROVE_OPTION) {
+		            File selectedFile = jFileChooser.getSelectedFile();
+		            TargetTextField.setText(selectedFile.getAbsolutePath());
+		        }
+				
+			}
+		});
+		TargetButton.setBounds(36, 84, 89, 23);
+		getContentPane().add(TargetButton);
+		
+		
+		JButton EncryptionButton = new JButton("Encrypt");
+		EncryptionButton.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				
+				
+				GetPublicKeyFromDatabase g = new GetPublicKeyFromDatabase();
+				
+				PGPLib pgp = new PGPLib();
+				 
+			    // is output ASCII or binary
+			    boolean asciiArmor = false;
+			    // should integrity check information be added
+			    // set to true for compatibility with GnuPG 2.2.8+
+			    boolean withIntegrityCheck = false;
+			 
+			    try {
+			    	
+			    	CheckValidRecipient c = new CheckValidRecipient();
+			    	if(c.isRecipientValid(UidTextField.getText()))
+					{
+			    		pgp.encryptFile(SourceTextField.getText(),"src/KeyFiles/pu_key_"+UidTextField.getText()+".asc",TargetTextField.getText()+"Output.pgp",asciiArmor, withIntegrityCheck);
+			    		
+			    		EncryptMsgLabel.setText("File encryption completed.");
+					}
+			    	else {
+			    		
+			    	 	EncryptMsgLabel.setText("Please enter valid user");
+			    	}
+					
+					
+			    } catch (PGPException e1) {
+					// TODO Auto-generated catch block
+					e1.printStackTrace();
+				} catch (IOException e1) {
+					// TODO Auto-generated catch block
+					e1.printStackTrace();
+				}  
+				
+				
+			}
+		});
+		EncryptionButton.setBounds(130, 227, 196, 23);
+		getContentPane().add(EncryptionButton);
+		
+		
+
+	}
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+import java.awt.EventQueue;
+
+import javax.swing.JDialog;
+import javax.swing.JFileChooser;
+import javax.swing.JFrame;
+import javax.swing.JButton;
+import javax.swing.JTextField;
+import javax.swing.JPasswordField;
+import javax.swing.JLabel;
+import java.awt.event.ActionListener;
+import java.io.File;
+import java.io.IOException;
+import java.awt.event.ActionEvent;
+import javax.swing.SwingConstants;
+
+import com.didisoft.pgp.PGPException;
+import com.didisoft.pgp.PGPLib;
+
+public class DecryptDialog extends JDialog {
+	private JTextField SourceTextField;
+	private JTextField TargetTextField;
+	private JPasswordField PassKeyField;
+
+	/**
+	 * Launch the application.
+	 */
+	public static void main(String[] args) {
+		EventQueue.invokeLater(new Runnable() {
+			public void run() {
+				try {
+					DecryptDialog dialog = new DecryptDialog();
+					dialog.setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
+					dialog.setVisible(true);
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+			}
+		});
+	}
+
+	/**
+	 * Create the dialog.
+	 */
+	public DecryptDialog() {
+		setBounds(100, 100, 450, 300);
+		getContentPane().setLayout(null);
+		
+		SourceTextField = new JTextField();
+		SourceTextField.setBounds(183, 30, 241, 23);
+		getContentPane().add(SourceTextField);
+		SourceTextField.setColumns(10);
+		
+		TargetTextField = new JTextField();
+		TargetTextField.setBounds(183, 82, 241, 23);
+		getContentPane().add(TargetTextField);
+		TargetTextField.setColumns(10);
+		
+		PassKeyField = new JPasswordField();
+		PassKeyField.setBounds(183, 126, 241, 23);
+		getContentPane().add(PassKeyField);
+		
+		JLabel PasskeyLabel = new JLabel("Pass Key");
+		PasskeyLabel.setHorizontalAlignment(SwingConstants.CENTER);
+		PasskeyLabel.setBounds(45, 130, 89, 14);
+		getContentPane().add(PasskeyLabel);
+		
+		final JLabel DecryptMsgLabel = new JLabel("");
+		DecryptMsgLabel.setHorizontalAlignment(SwingConstants.CENTER);
+		DecryptMsgLabel.setBounds(156, 182, 163, 23);
+		getContentPane().add(DecryptMsgLabel);
+		
+		JButton SourceButton = new JButton("Source");
+		SourceButton.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				
+				JFileChooser jFileChooser = new JFileChooser();
+		        jFileChooser.setCurrentDirectory(new File("C:"));
+		         
+		        int result = jFileChooser.showOpenDialog(new JFrame());
+		     
+		     
+		        if (result == JFileChooser.APPROVE_OPTION) {
+		            File selectedFile = jFileChooser.getSelectedFile();
+		           
+		            SourceTextField.setText(selectedFile.getAbsolutePath());
+		        }
+				
+			}
+		});
+		SourceButton.setBounds(45, 29, 89, 23);
+		getContentPane().add(SourceButton);
+		
+		JButton TargetButton = new JButton("Target");
+		TargetButton.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				
+				JFileChooser jFileChooser = new JFileChooser();
+				jFileChooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
+		        jFileChooser.setCurrentDirectory(new File("C:"));
+		         
+		        int result = jFileChooser.showOpenDialog(new JFrame());
+		     
+		     
+		        if (result == JFileChooser.APPROVE_OPTION) {
+		            File selectedFile = jFileChooser.getSelectedFile();
+		            TargetTextField.setText(selectedFile.getAbsolutePath());
+		        }
+				
+			}
+		});
+		TargetButton.setBounds(45, 81, 89, 23);
+		getContentPane().add(TargetButton);
+		
+		
+		JButton DecryptButton = new JButton("Decrypt");
+		DecryptButton.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				
+				PGPLib pgp = new PGPLib();
+				 
+				String privateKeyPass = "123456789";
+			 
+			    try {
+			    	
+			    	
+			    	 pgp.decryptFile(SourceTextField.getText(),"D:\\New folder\\Akanksha - private.asc",privateKeyPass,TargetTextField.getText()+"Output.txt");
+			    	 DecryptMsgLabel.setText("File decryption completed.");
+			    } catch (PGPException e1) {
+					// TODO Auto-generated catch block
+					e1.printStackTrace();
+				} catch (IOException e1) {
+					// TODO Auto-generated catch block
+					e1.printStackTrace();
+				}  
+				
+			}
+		});
+		DecryptButton.setBounds(144, 227, 174, 23);
+		getContentPane().add(DecryptButton);
+
+	}
+}
